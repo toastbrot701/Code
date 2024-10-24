@@ -17,5 +17,6 @@ public class leckeier {
 
 
         System.out.println(adj);
+        System.out.println(adj.get(6));
     }
 }
