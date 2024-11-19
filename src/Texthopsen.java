@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 
@@ -23,8 +25,8 @@ public class Texthopsen {
         String a = fertiger_text.replaceAll("\\s+","");
         String b = a.replaceAll(",", "");
         String c = b.replaceAll("\\.", "");
-        String d = c.replaceAll("\n", "");
-        String e = d.replaceAll("‘", "");
+        String d = c.replaceAll("\n", ""); //Text wird optimiert damit er von der Methode besser gelesn werden kann
+        String e = d.replaceAll("‘", ""); // Kommas, Zeilenumbrüche und Leerzeichen sollen dabei nicht mitgezählt werden
         String f = e.replaceAll("‚", "");
         String Hopsitext = f.replaceAll("''", "");
         //System.out.println(Hopsitext);
@@ -33,7 +35,7 @@ public class Texthopsen {
 
     }
 
-    // Funktion zur Berechnung der Endposition einer Sprungsequenz
+    // Methode zur Erstellung eines Hopsitextes
     public static String create_Hopsitext(String text, int position) {
 
         StringBuilder new_text = new StringBuilder();
@@ -56,7 +58,7 @@ public class Texthopsen {
                 break; // Rückgabe der Position, wenn das Ende des Textes erreicht ist
             }
 
-            //erweitern des Strings
+            //Aktualisieren der Position bzw. Textes
             position = new_position;
             new_text.append(aktueller_buchstabe);
 
@@ -72,7 +74,8 @@ public class Texthopsen {
     public static int Texthopsen(char c) {
 
         if (c >= 'a' && c <= 'z') {
-            int Sprungweite = c - 'a' + 1; //Asci code
+            int Sprungweite = c - 'a' + 1; //Sprungweite wird über Asci Code berechnet
+            // (jeder Buchstabe hat dabei betimmten Wert sodass die Differnez zwischen den Werten berechnet werden kann)
             return Sprungweite; //
 
         } //else if (c == ' ') {
@@ -80,7 +83,7 @@ public class Texthopsen {
         //}
 
         switch (c) {
-            case 'ä': return 26;
+            case 'ä': return 26; //ausnahmen für Sonderzeichen diesen wird ein Extra Wert zugewiesen
             case 'ö': return 27;
             case 'ü': return 28;
             case 'ß': return 29;

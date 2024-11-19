@@ -3,8 +3,8 @@ import java.util.*;
 public class Wandertag {
     public static class Mitglied {
 
-        private int max_streckenlänge;
-        private int min_streckenlänge;
+        private final int max_streckenlänge;
+        private final int min_streckenlänge;
 
         public Mitglied(int min_streckenlänge, int max_streckenlänge) {
             this.min_streckenlänge = min_streckenlänge;
@@ -24,9 +24,14 @@ public class Wandertag {
             return strecke >= min_streckenlänge && strecke <= max_streckenlänge;
         }
 
+        @Override
+        public String toString() {
+            return "Min: " + min_streckenlänge + ", Max: " + max_streckenlänge;
+        }
+
     }
 
-    private List<Mitglied> Mitgliederliste;
+    private final List<Mitglied> Mitgliederliste;
 
     public Wandertag() {
         this.Mitgliederliste = new ArrayList<>();
@@ -58,55 +63,110 @@ public class Wandertag {
                 Zahlen.add(Long.parseLong(words[1]));
 
             } else if (words.length == 1) {
-                int min = Integer.parseInt(words[0]);
-                wandertag.neues_Mitglied(new Mitglied(min,Integer.MAX_VALUE));
-                Zahlen.add(Long.parseLong(words[0]));
-
+                wandertag.neues_Mitglied(new Mitglied(0,0));
 
             }
 
         }
         //wandertag.add_Zahlen();
         scanner.close();
-        wandertag.optimale_Strecke(Zahlen);
+
+
+        List<Long> finaleStrecken = wandertag.optimale_Strecke(Zahlen);
+        Set<Wandertag.Mitglied> Gesamtanzahl_Mitglieder = new HashSet<>();
+        System.out.println("Die optimalen Strecken mit den Teilnehmeranzahlen sind:");
+
+        for (Long strecke : finaleStrecken) {
+            int teilnehmer = wandertag.Anzahl_Teilnehmer(strecke);
+            List <Wandertag.Mitglied> Mitglieder_Teilnahme = wandertag.Mitglieder_die_Teilnehmen(strecke);
+            System.out.println("Strecke: " + strecke + " km, Anzahl Teilnehmer: " + teilnehmer);
+            System.out.println("Teilnehmende Mitglieder: " + Mitglieder_Teilnahme);
+            Gesamtanzahl_Mitglieder.addAll(Mitglieder_Teilnahme);
+        }
+
+        System.out.println("Die Gesamtanzahl Mitglieder ist: "+Gesamtanzahl_Mitglieder.size());
+
 
     }
 
-    public void optimale_Strecke(List<Long> Zahl){
+    public List<Long> optimale_Strecke(List<Long> Zahl) {
         Set<Long> alle_strecken = new HashSet<>(Zahl);
         //long max_strecke = Collections.max(Zahl);
-        long optimale_strecke = 0;
-        long max_Teilnehmer = 0;
-        List<Long> Optimale_Strecken = new ArrayList<>();
-        int j = 0;
+
+        //List<Long> Optimale_Strecken = new ArrayList<>();
+        List<Long> End_Strecken = new ArrayList<>();
+        Set<Mitglied> Gleiche_Mitglieder = new HashSet<>();
 
 
-        for(int i = 0; i < 3; i++){
-            for(long best_strecke : alle_strecken){
-                long anzahlteilnehmer = 0;
+        while (End_Strecken.size() < 3 && !alle_strecken.isEmpty()) {
+            long optimale_strecke = 0;
+            long max_Teilnehmer = 0;
+            List<Long> Müll = new ArrayList<>();
+            for (long best_strecke : alle_strecken) {
+                int anzahlteilnehmer = 0;
                 for (Mitglied mitglied : Mitgliederliste) {
-                    if (mitglied.nimmtteil(best_strecke)) {
+                    if (mitglied.nimmtteil(best_strecke) && !Gleiche_Mitglieder.contains(mitglied)) {
                         anzahlteilnehmer++;
-                    }
-                    if (anzahlteilnehmer > max_Teilnehmer) {
-                        max_Teilnehmer = anzahlteilnehmer;
-                        optimale_strecke = best_strecke;
-                        alle_strecken.clear();
-                        optimale_Strecke(alle_strecken.remove(optimale_strecke));
 
                     }
+                }
 
+                if(anzahlteilnehmer > max_Teilnehmer) {
+                    max_Teilnehmer = anzahlteilnehmer;
+                    optimale_strecke = best_strecke;
+                    //optimale_Strecke(alle_strecken.remove(optimale_strecke));
                 }
 
             }
-            Optimale_Strecken.add(optimale_strecke);
 
-            System.out.println("Die optiamel Streckenlänge ist "+Optimale_Strecken+" mit "+max_Teilnehmer+" Teilnehmern");
+
+            End_Strecken.add(optimale_strecke);
+            alle_strecken.remove(optimale_strecke);
+            Müll.add(optimale_strecke);
+
+            for (Wandertag.Mitglied mitglied : Mitgliederliste) {
+                if (mitglied.nimmtteil(optimale_strecke)) {
+                    Gleiche_Mitglieder.add(mitglied);
+                }
+            }
+
+
+            alle_strecken.removeAll(Müll);
+
         }
-
-
+        return End_Strecken;
 
     }
+
+
+
+    public List<Mitglied> Mitglieder_die_Teilnehmen(long Strecken){
+        List<Mitglied> Teilnehmer = new ArrayList<>();
+
+        for (Mitglied mitglied : Mitgliederliste) {
+            if (mitglied.nimmtteil(Strecken)) {
+                Teilnehmer.add(mitglied);
+
+            }
+        }
+
+        return Teilnehmer;
+
+    }
+
+
+
+    public int Anzahl_Teilnehmer(long Strecken){
+        int Teilnehmer_Anzahl = 0;
+        for (Mitglied mitglied : Mitgliederliste) {
+            if (mitglied.nimmtteil(Strecken)){
+                Teilnehmer_Anzahl++;
+            }
+        }
+        return Teilnehmer_Anzahl;
+    }
+
+
 
 
 }
